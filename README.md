@@ -6,10 +6,12 @@
   + 수백 기가 바이트 이상의 레코드를 관리할 것을 고려하여 설계
   + 데이터 베이스 혹은 기타 오픈 소스 저장소를 활용할 수 없음
 
+
 + 기능적 요구 사항
   + 사용자가 새로운 자료 입력/삭제 가능
   + 입력 데이터는 이름, 학번, 과목, 점수. 추가적인 정보는 임의로 정의 가능
   + 이름순, 평균순, 학번순으로 정렬한 결과 출력 가능
+
 
 + 개발 환경
   + C 언어를 이용해서 표준 입출력 및 파일 관련 라이브러리 외에는 직접 구현 할 것
@@ -17,11 +19,23 @@
     + Github를 이용하여 소스코드 형상 관리
     + Makefile or CMake 를 이용한 build configuration 구성
 
+
+### 프로그램 설명
+
 + 실행 파일 이름 : app.out
 ```
 $ make
 $ ./app.out
 ```
+
++ 입출력 파일 설정
+```c
+#define NAME_SORT_FILE "nameSortStudent"
+#define ID_SORT_FILE "idSortStudent"
+#define AVG_SORT_FILE "avgSortStudent"
+```
+  + 각각 이름, 학번, 평균순으로 정렬 파일명을 설정하는 코드이다.
+
 
 정렬에는 두 가지 알고리즘을 사용했다.
 
