@@ -40,7 +40,7 @@ int main(){
 		fprintf(stderr, "Error\n");
 		return 0;
 	}else{
-		while(fread(&rec, sizeof(rec), 1, fp) > 0 ){	// 현재 데이터 수 저장
+		while(fread(&rec, sizeof(rec), 1, fp) > 0 ){	// 현재 데이터 수
 			data_number += 1L;
 		}
 	}
@@ -50,7 +50,7 @@ int main(){
 		fprintf(stderr, "Error\n");
 		return 0;
 	}else{
-		while(fread(&avg, sizeof(avg), 1, fp) > 0 ){	// 현재 학생 수 저장
+		while(fread(&avg, sizeof(avg), 1, fp) > 0 ){	// 현재 학생 수
 			students_number += 1L;
 		}
 	}
@@ -95,7 +95,7 @@ void Open_File(FILE *fp, char str[]){	// 파일 오픈
 	}
 }
 
-void Register(FILE *fp){ // 성적 추가
+void Register(FILE *fp){ 	// 학생 등록 또는 성적 추가 함수
 	printf("---Register---\n");
 	printf("Name, Id, Subject, Score : ");
 
@@ -103,13 +103,13 @@ void Register(FILE *fp){ // 성적 추가
 	Student rec_temp;
 	Average avg;
 
-	long index = 0L;	// 데이터를 삽입 위치 저장
+	long index = 0L;	// 데이터 삽입 위치 저장
 	
 	while(scanf("%s %d %s %d", rec.name, &rec.id, rec.subject, &rec.score) == 4){
-		Open_File(fp, NAME_SORT_FILE); // 이름순 정렬 파일 오픈		
-		while(fread(&rec_temp, sizeof(rec_temp), 1, fp) > 0){
-			if(strcmp(rec.name, rec_temp.name) < 0){ // 새로운 데이터 삽입 위치를 정하기 위한 조건문
-				break;
+		Open_File(fp, NAME_SORT_FILE); 				// 이름순 정렬 파일 오픈		
+		while(fread(&rec_temp, sizeof(rec_temp), 1, fp) > 0){ 	// 파일을 한 줄 씩 읽고 
+			if(strcmp(rec.name, rec_temp.name) < 0){ 	// 입력 데이터와 파일의 데이터를 비교하여
+				break;					// 정렬되어 입력될 위치를 index에 저장
 			}
 			index++;
 		}
@@ -117,54 +117,54 @@ void Register(FILE *fp){ // 성적 추가
 		fclose(fp);
 				
 		index = 0;
-		Open_File(fp, ID_SORT_FILE); // 학번순 정렬 파일 오픈
+		Open_File(fp, ID_SORT_FILE);
 		while(fread(&rec_temp, sizeof(rec_temp), 1, fp) > 0){
-			if(rec.id < rec_temp.id) break; // 학번 내림차순 정렬 삽입 위치를 정하는 조건문
+			if(rec.id < rec_temp.id) break; 		// 학번 내림차순 정렬 삽입 위치를 정하는 조건문
 			index++;
 		}
 		Sort(fp, &rec, index);
 		fclose(fp);
 		data_number++;
 		
-		Open_File(fp, AVG_SORT_FILE); // 평균순 정렬 파일 오픈
+		Open_File(fp, AVG_SORT_FILE);
 		Register_Avg(fp, &rec, &avg);
 		fclose(fp);
 		break;
 	}
 }
 
-void Sort(FILE *fp, Student rec, long index){ // 이름순, 학번순 정렬 함수
+void Sort(FILE *fp, Student rec, long index){ 			// 이름순, 학번순 정렬 함수
 	Student rec_temp;
 
-	for(int i = data_number; i >= index; i--){ 		 // 저장된 데이터를 index번호까지 뒤로 한 칸씩 밀고 저장
+	for(int i = data_number; i >= index; i--){ 		// 파일의 데이터를 파일 끝 방향으로 index 까지 한 칸씩 밀고 저장
 		fseek(fp, (i - 1) * sizeof(rec_temp), SEEK_SET);
 		fread(&rec_temp, sizeof(rec_temp), 1, fp);
 		fseek(fp, i * sizeof(rec_temp), SEEK_SET);
 		fwrite(&rec_temp, sizeof(rec_temp), 1, fp);
 	}
 
-	fseek(fp, index * sizeof(rec), SEEK_SET);		// index번호에서 데이터 삽입
+	fseek(fp, index * sizeof(rec), SEEK_SET);		// index번호에 왔을 때 데이터 삽입
 	fwrite(&rec, sizeof(rec), 1, fp);
 }
 
-void Register_Avg(FILE *fp, Student rec, Average avg){ // 평균순 파일 데이터 삽입 함수
+void Register_Avg(FILE *fp, Student rec, Average avg){ 		// 평균 추가 함수
 	Average avg_temp;
 	int index = 0;
 	double current;
 	
-	while(fread(&avg, sizeof(avg), 1, fp) > 0){ // 신규가 아닌 삽입의 경우
+	while(fread(&avg, sizeof(avg), 1, fp) > 0){ 	// 신규가 아닌 삽입의 경우
 		if(avg.id == rec.id) {
-			current = avg.avg;	// 변경 전 평균을 저장
+			current = avg.avg;		// 변경 전 평균을 저장
 
-			avg.count++;		// 신규데이터로 평균을 다시 계산
+			avg.count++;			// 입력데이터로 평균을 다시 계산
 			avg.total += rec.score;
 			avg.avg = (double)avg.total / avg.count;
 
 			fseek(fp, index * sizeof(avg), SEEK_SET);
 			fwrite(&avg, sizeof(avg), 1, fp);
 
-			if(current < avg.avg){	// 변경 후 평균과 비교하여 정렬에 용이하게 이용
-				Sort_Avg(fp, &avg, index, 1);	// 변경 후의 평균 값이 오르면 1, 내리면 0 인자 전달
+			if(current < avg.avg){			// 변경 전 평균과 비교하여 정렬에 용이하게 이용
+				Sort_Avg(fp, &avg, index, 1);	// 변경 후의 평균 값이 오르면 1, 내리면 0을 인자로 전달
 			}else if(current > avg.avg){
 				Sort_Avg(fp, &avg, index, 0);
 			}
@@ -183,7 +183,7 @@ void Register_Avg(FILE *fp, Student rec, Average avg){ // 평균순 파일 데�
 	fwrite(&avg, sizeof(avg), 1, fp);
 	students_number++;			  // 총 학생 수 증가
 
-	if(index == 0) return;		// 첫 번째 등록된 학생은 정렬 없이 종료
+	if(index == 0) return;			  // 첫 번째로 등록된 학생일 경우 정렬 없이 종료
 	
 	int i = 1;
 	while(1){
@@ -193,9 +193,9 @@ void Register_Avg(FILE *fp, Student rec, Average avg){ // 평균순 파일 데�
 		if(avg.avg > avg_temp.avg){
 			fwrite(&avg_temp, sizeof(avg_temp), 1, fp);
 			i++;
-		}else break;
+		}else break;			// 정렬에 필요한 비교가 끝나면 반복문을 빠져나간다.
 	
-		if(index - i < 0){ // 파일의 첫 데이터 index에 도착하면 첫 주소를 저장하고 반복문을 빠져나감
+		if(index - i < 0){ 		// 파일의 첫 데이터 index에 도착하면 첫 주소를 저장하고 반복문을 빠져나간다.
 			fseek(fp, 0, SEEK_SET);
 			break;
 		}
@@ -263,42 +263,42 @@ void Delete(FILE *fp){		// 학번과 과목이름을 입력받고 삭제
 	scanf("%s", sub);
 	
 
-	Open_File(fp, NAME_SORT_FILE);			// 이름순 정렬 파일 오픈
+	Open_File(fp, NAME_SORT_FILE);
 	if(Delete_Sort(fp, id, NAME_SORT_FILE, sub) == 1){	// 삭제 후 재정렬
 		printf("None ID\n");				// 1을 반환하면 존재하지 않는 학번으로 종료된다.
 		return;
 	}
 	fclose(fp);
 
-	Open_File(fp, ID_SORT_FILE);						// 학번순 정렬 파일 오픈
+	Open_File(fp, ID_SORT_FILE);
 	while(fread(&rec, sizeof(rec), 1, fp) > 0){		
-		if(rec.id == id)						// 평균순 정렬을 위해
-			if(strcmp(rec.subject, sub) == 0) score = rec.score;	// 제거되는 과목의 점수를 저장
+		if(rec.id == id)						// 평균순 정렬을 위해 제거되는 과목의 점수를 저장
+			if(strcmp(rec.subject, sub) == 0) score = rec.score;	
 	}
-	Delete_Sort(fp, id, ID_SORT_FILE, sub);				// 삭제 후 재정렬
+	Delete_Sort(fp, id, ID_SORT_FILE, sub);					// 삭제 후 재정렬
 	fclose(fp);
 
-	data_number -= 1;				// 전체 데이터 수 감소
+	data_number -= 1;					// 전체 데이터 수 감소
 	
-	Open_File(fp, AVG_SORT_FILE);		// 평균순 정렬 파일 오픈
+	Open_File(fp, AVG_SORT_FILE);
 	Delete_Avg(fp, id, score);			
 	fclose(fp);
 }
 
-int Delete_Sort(FILE *fp, int id, char str[], char sub[]){ // 입력받은 데이터 삭제
+int Delete_Sort(FILE *fp, int id, char str[], char sub[]){ 	// 삭제 후 정렬
 	Student rec;
 	long index = 0L;
 	
 	fseek(fp, 0, SEEK_SET);
-	while(fread(&rec, sizeof(rec), 1, fp) > 0){ // 입력받은 학번과, 과목명 비교하여 위치를 index에 저장
+	while(fread(&rec, sizeof(rec), 1, fp) > 0){ // 입력받은 학번과, 과목명을 파일의 데이터와 비교하여 위치를 index에 저장
 		if(rec.id == id)
 			if(strcmp(rec.subject, sub) == 0) break;
 		index++;
 	}
 	
-	if(index == data_number) return 1;	// 데이터의 위치가 파일 끝에 도착하면 일치하는 데이터가 없으므로 종료
+	if(index == data_number) return 1;	    // index가 파일 끝에 도착하면 일치하는 데이터가 없으므로 종료
 	
-	for(int i = 1; index + i < data_number; i++){ // index의 위치에서 파일 끝까지 데이터를 덮어쓰기
+	for(int i = 1; index + i < data_number; i++){ 		// index의 위치에서 파일 끝까지 데이터를 덮어쓰기
 		fseek(fp, (index + i) * sizeof(rec), SEEK_SET);
 		fread(&rec, sizeof(rec), 1, fp);
 		fseek(fp, (index + i - 1) * sizeof(rec), SEEK_SET);
@@ -337,13 +337,13 @@ void Delete_Avg(FILE *fp, int id, int score){ // 평균순 정렬 파일에서 �
 		students_number--;	// 전체 학생 수 감소
 		return;
 	}
-							// 과목 수가 0이 아닐 경우
-	avg.avg = (double)avg.total / avg.count;	// 해당 학생의 평균을 다시 계산 후 저장
+							
+	avg.avg = (double)avg.total / avg.count;	// 과목 수가 0이 아닐 경우 해당 학생의 평균을 다시 계산 후 저장
 
 	fseek(fp, index * sizeof(avg), SEEK_SET);
 	fwrite(&avg, sizeof(avg), 1, fp);
 
-	if(current < avg.avg){				// 평균이 올랐으면 1을 인자로, 내렸으면 0을 인자로 함수 사용
+	if(current < avg.avg){				// 평균이 올랐으면 1, 내렸으면 0을 인자로 사용
 		Sort_Avg(fp, avg, index, 1);
 	}else if(current > avg.avg){
 		Sort_Avg(fp, avg, index, 0);
