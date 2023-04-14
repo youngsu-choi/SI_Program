@@ -1,6 +1,3 @@
-// 이름순, 학번순, 평균순 세 가지 파일을 각각 관리한다.
-// 평균순 파일 관리 함수는 별도로 있다.
-
 #include<stdio.h>
 #include<unistd.h>
 #include<sys/types.h>
