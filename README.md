@@ -72,9 +72,9 @@ $ ./app.out
 
 ## 주요 코드
 
-> 정렬에는 두 가지 알고리즘을 사용했다.
+> 데이터 삽입과정의 정렬에는 두 가지 알고리즘을 사용했다.
 >
-> 첫 번째는 삽입할 데이터의 위치(index)를 저장하고 있을 경우의 알고리즘
+> 첫 번째, 삽입할 데이터의 위치(index)를 저장하고 있을 경우의 알고리즘
 > ```
 > void Sort(FILE *fp, Student rec, long index){                   // 이름순, 학번순 정렬 함수
 >        Student rec_temp;
@@ -92,8 +92,40 @@ $ ./app.out
 > ```
 > 대용량의 데이터를 하나의 파일에서 관리하는 경우 해당 알고리즘은 파일의 시작부터 삽입위치까지 데이터를 하나씩 검사하며 이동하기 때문에 만약 삽입 위치가 파일의 끝부분에 있다면 적합하지 않은 알고리즘이다.
 > 
-> 두 번째는 삽입할 데이터와 주변 데이터의 값을 비교하며 삽입할 위치로 향하는 알고리즘
+> 두 번째, 삽입할 데이터와 주변 데이터의 값을 비교하며 삽입할 위치로 향하는 알고리즘
 > ```
-> 
+> int i = 1;
+> while(1){
+>        fseek(fp, (index - i) * sizeof(avg), SEEK_SET);         // 파일의 끝 데이터부터 뒤로 한 칸씩 밀고
+>        fread(&avg_temp, sizeof(avg_temp), 1, fp);              // 삽입 데이터의 위치를 잡는다.
+>        fseek(fp, (index - i + 1) * sizeof(avg), SEEK_SET);
+>        if(avg.avg > avg_temp.avg){
+>                fwrite(&avg_temp, sizeof(avg_temp), 1, fp);
+>                i++;
+>        }else break;                    // 정렬에 필요한 비교가 끝나면 반복문을 빠져나간다.
+>        
+>        if(index - i < 0){              // 파일의 첫 데이터 index에 도착하면 첫 주소를 저장하고 반복문을 빠져나간다.
+>                fseek(fp, 0, SEEK_SET);
+>                break;
+>        }
+> }
+> fwrite(&avg, sizeof(avg), 1, fp);       // 반복문을 나와서 삽입위치에 데이터를 삽입한다.
 > ```
-> 데이터를 삽입할 때 정렬을 완료하는 프로그램 특성상 삽입할 데이터 위치(index) 확인을 위해 파일을 두 번 검사하는 노력을 덜 수 있다.
+> 반복문 안에서 새로운 데이터의 위치를 설정하고 빠져나온다.
+> 마지막 줄에서 해당 위치에 입력 데이터를 쓰기 하면 정렬이 끝난다.
+> 첫 번째 알고리즘과 다르게 데이터의 삽입과 정렬을 동시에 수행하는 프로그램은 삽입할 데이터 위치(index) 확인을 위해 파일을 두 번 검사하는 과정을 줄일 수 있다.
+
+> 데이터 삭제과정의 정렬 알고리즘이다.
+> ```
+> for(int i = 1; index + i < data_number; i++){ // index의 위치에서 파일 끝까지 데이터를 덮어쓰기
+>               fseek(fp, (index + i) * sizeof(rec), SEEK_SET);
+>               fread(&rec, sizeof(rec), 1, fp);
+>               fseek(fp, (index + i - 1) * sizeof(rec), SEEK_SET);
+>               fwrite(&rec, sizeof(rec), 1, fp);
+> }
+>
+> truncate(str, (data_number - 1) * sizeof(rec)); // 삭제 된 데이터 크기만큼 파일 크기 줄이기
+> ```
+> 1. 삭제할 데이터의 위치를 저장(index)
+> 2. index 다음 위치의 데이터를 index 위치에 덮어쓰고 파일의 끝까지 반복한다.
+> 3. 삭제 된 데이터의 크기만큼 파일의 크기를 줄인다.
