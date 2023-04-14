@@ -28,10 +28,36 @@ void PrintData_Avg();
 long data_number;	// 전체 데이터 수
 long students_number;	// 학생 수
 
+typedef struct{		// 대용량 데이터 처리를 위한 구조체
+	char file_name[30];
+	char first_data[20];
+	char last_data[20];
+}NameSort;
+
+typedef struct{
+	char file_name[30];
+	int first_data;
+	int last_data;
+}IdSort;
+
+typedef struct{
+	char file_name[30];
+	double first_data;
+	double last_data;
+}AvgSort;
+
+//NameSort stu[2];
+//IdSort ID[2];
+//char filename[30];
+
 int main(){
 	FILE *fp;
 	Student rec;
 	Average avg;
+	
+	//strcpy(ID[0].file_name, "idSortStudent");
+	//ID[0].first_data = 20180736;
+	//ID[0].last_data = 20201659;
 
 	data_number = 0L;
 	students_number = 0L;
@@ -117,6 +143,11 @@ void Register(FILE *fp){ 	// 학생 등록 또는 성적 추가 함수
 		fclose(fp);
 				
 		index = 0;
+		/*for(int i = 0; i < (sizeof(ID) / sizeof(ID[0])); i++){
+			if(rec.id >= ID[i].first_data && rec.id <= ID[i].last_data){
+				strcpy(filename, ID[i].file_name);
+			}
+		}*/
 		Open_File(fp, ID_SORT_FILE);
 		while(fread(&rec_temp, sizeof(rec_temp), 1, fp) > 0){
 			if(rec.id < rec_temp.id) break; 		// 학번 내림차순 정렬 삽입 위치를 정하는 조건문
@@ -356,6 +387,7 @@ void Sort_Print(FILE *fp){ // 이름순, 학번순, 평균순으로 정렬된 �
 	printf("2. Id Sort\n");
 	printf("3. Average Sort\n");
 	printf("4. Exit\n");
+	printf("Select : ");
 	
 	int choice;
 	scanf("%d", &choice);
