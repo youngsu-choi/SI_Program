@@ -77,7 +77,19 @@ $ ./app.out
 >
 > 첫 번째는 삽입할 데이터의 위치(index)를 저장하고 있을 경우의 알고리즘
 > ```
->
+>void Sort(FILE *fp, Student rec, long index){                   // 이름순, 학번순 정렬 함수
+        Student rec_temp;
+
+        for(int i = data_number; i >= index; i--){              // 파일의 데이터를 파일 끝 방향으로 index 까지 한 칸씩 밀고 저장
+                fseek(fp, (i - 1) * sizeof(rec_temp), SEEK_SET);
+                fread(&rec_temp, sizeof(rec_temp), 1, fp);
+                fseek(fp, i * sizeof(rec_temp), SEEK_SET);
+                fwrite(&rec_temp, sizeof(rec_temp), 1, fp);
+        }
+
+        fseek(fp, index * sizeof(rec), SEEK_SET);               // index번호에서 데이터 삽입
+        fwrite(&rec, sizeof(rec), 1, fp);
+}
 > ```
 > 대용량의 데이터를 하나의 파일에서 관리하는 경우 해당 알고리즘은 파일의 시작부터 삽입위치까지 데이터를 하나씩 검사하며 이동하기 때문에 만약 삽입 위치가 파일의 끝부분에 있다면 적합하지 않은 알고리즘이다.
 > 
