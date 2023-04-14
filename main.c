@@ -8,6 +8,10 @@
 #include "student.h"	// 학생정보, 평균 구조체 헤더파일
 #include "average.h"
 
+#define NAME_SORT_FILE "nameSortStudent"
+#define ID_SORT_FILE "idSortStudent"
+#define AVG_SORT_FILE "avgSortStudent"
+
 void Open_File();	// 파일 오픈
 void Register();	// 이름순, 학번순 정렬 파일 관리 함수
 void Delete();
@@ -32,7 +36,7 @@ int main(){
 	data_number = 0L;
 	students_number = 0L;
 
-	if((fp = fopen("nameSortStudent", "r")) == NULL){
+	if((fp = fopen(NAME_SORT_FILE, "r")) == NULL){
 		fprintf(stderr, "Error\n");
 		return 0;
 	}else{
@@ -42,7 +46,7 @@ int main(){
 	}
 	fclose(fp);
 	
-	if((fp = fopen("avgSortStudent", "r")) == NULL){
+	if((fp = fopen(AVG_SORT_FILE, "r")) == NULL){
 		fprintf(stderr, "Error\n");
 		return 0;
 	}else{
@@ -102,7 +106,7 @@ void Register(FILE *fp){ // 성적 추가
 	long index = 0L;	// 데이터를 삽입 위치 저장
 	
 	while(scanf("%s %d %s %d", rec.name, &rec.id, rec.subject, &rec.score) == 4){
-		Open_File(fp, "nameSortStudent"); // 이름순 정렬 파일 오픈		
+		Open_File(fp, NAME_SORT_FILE); // 이름순 정렬 파일 오픈		
 		while(fread(&rec_temp, sizeof(rec_temp), 1, fp) > 0){
 			if(strcmp(rec.name, rec_temp.name) < 0){ // 새로운 데이터 삽입 위치를 정하기 위한 조건문
 				break;
@@ -113,7 +117,7 @@ void Register(FILE *fp){ // 성적 추가
 		fclose(fp);
 				
 		index = 0;
-		Open_File(fp, "idSortStudent"); // 학번순 정렬 파일 오픈
+		Open_File(fp, ID_SORT_FILE); // 학번순 정렬 파일 오픈
 		while(fread(&rec_temp, sizeof(rec_temp), 1, fp) > 0){
 			if(rec.id < rec_temp.id) break; // 학번 내림차순 정렬 삽입 위치를 정하는 조건문
 			index++;
@@ -122,7 +126,7 @@ void Register(FILE *fp){ // 성적 추가
 		fclose(fp);
 		data_number++;
 		
-		Open_File(fp, "avgSortStudent"); // 평균순 정렬 파일 오픈
+		Open_File(fp, AVG_SORT_FILE); // 평균순 정렬 파일 오픈
 		Register_Avg(fp, &rec, &avg);
 		fclose(fp);
 		break;
@@ -259,24 +263,24 @@ void Delete(FILE *fp){		// 학번과 과목이름을 입력받고 삭제
 	scanf("%s", sub);
 	
 
-	Open_File(fp, "nameSortStudent");			// 이름순 정렬 파일 오픈
-	if(Delete_Sort(fp, id, "nameSortStudent", sub) == 1){	// 삭제 후 재정렬
+	Open_File(fp, NAME_SORT_FILE);			// 이름순 정렬 파일 오픈
+	if(Delete_Sort(fp, id, NAME_SORT_FILE, sub) == 1){	// 삭제 후 재정렬
 		printf("None ID\n");				// 1을 반환하면 존재하지 않는 학번으로 종료된다.
 		return;
 	}
 	fclose(fp);
 
-	Open_File(fp, "idSortStudent");						// 학번순 정렬 파일 오픈
+	Open_File(fp, ID_SORT_FILE);						// 학번순 정렬 파일 오픈
 	while(fread(&rec, sizeof(rec), 1, fp) > 0){		
 		if(rec.id == id)						// 평균순 정렬을 위해
 			if(strcmp(rec.subject, sub) == 0) score = rec.score;	// 제거되는 과목의 점수를 저장
 	}
-	Delete_Sort(fp, id, "idSortStudent", sub);				// 삭제 후 재정렬
+	Delete_Sort(fp, id, ID_SORT_FILE, sub);				// 삭제 후 재정렬
 	fclose(fp);
 
 	data_number -= 1;				// 전체 데이터 수 감소
 	
-	Open_File(fp, "avgSortStudent");		// 평균순 정렬 파일 오픈
+	Open_File(fp, AVG_SORT_FILE);		// 평균순 정렬 파일 오픈
 	Delete_Avg(fp, id, score);			
 	fclose(fp);
 }
@@ -329,7 +333,7 @@ void Delete_Avg(FILE *fp, int id, int score){ // 평균순 정렬 파일에서 �
 			fwrite(&avg, sizeof(avg), 1, fp);
 		}	
 	
-		truncate("avgSortStudent", (students_number - 1) * sizeof(avg)); // 삭제한 크기만큼 파일 크기 줄이기
+		truncate(AVG_SORT_FILE, (students_number - 1) * sizeof(avg)); // 삭제한 크기만큼 파일 크기 줄이기
 		students_number--;	// 전체 학생 수 감소
 		return;
 	}
@@ -358,10 +362,10 @@ void Sort_Print(FILE *fp){ // 이름순, 학번순, 평균순으로 정렬된 �
 
 	switch(choice){
 		case 1:
-			PrintData(fp, "nameSortStudent");
+			PrintData(fp, NAME_SORT_FILE);
 			break;
 		case 2:
-			PrintData(fp, "idSortStudent");
+			PrintData(fp, ID_SORT_FILE);
 			break;
 		case 3:
 			PrintData_Avg(fp);
@@ -385,7 +389,7 @@ void PrintData(FILE *fp, char str[]){ // 이름순, 학번순 파일 출력 함�
 
 void PrintData_Avg(FILE *fp){	// 평균순 파일 출력 함수
 	Average avg;
-	Open_File(fp, "avgSortStudent");
+	Open_File(fp, AVG_SORT_FILE);
 
 	fseek(fp, 0, SEEK_SET);
 	while(fread(&avg, sizeof(avg), 1, fp) > 0){ 		    // 파일의 데이터가 존재하는 동안 한 줄 씩 읽기
