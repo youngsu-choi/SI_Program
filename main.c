@@ -2,7 +2,7 @@
 #include<unistd.h>
 #include<sys/types.h>
 #include<string.h>
-#include "student.h"	// 학생정보, 평균 구조체 헤더파일
+#include "student.h"
 #include "average.h"
 
 #define NAME_SORT_FILE "nameSortStudent"
